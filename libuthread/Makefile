@@ -1,20 +1,28 @@
-# Target library
-lib := libuthread.a
-objs	:= libuthread.o
-CC		:= gcc
-CFLAGS 	:= -Wall -Wextra -Werror 
-CFLAGS 	+= -g
+targets := libuthread.a
+objs    := queue.o
 
+CC      := gcc
+CFLAGS  := -Wall -Wextra -Werror -MMD
+CFLAGS  += -g
 
+ifneq ($(V),1)
+Q = @
+endif
 
-all: $(lib)
+# Dep tracking *must* be below the 'all' rule
+deps := $(patsubst %.o,%.d,$(objs))
+-include $(deps)
 
-## TODO: Phase 1
-libuthread.a:
-ar rcs libuthread.a libuthread.o
+all: $(targets)
 
-libuthread.o: libuthread/queue.c libuthread/queue.h
-	$(CC) $(CFLAGS)  libuthread/queue.c -o libuthread/queue
+%.a: $(objs)
+	ar rcs $@ $^
+
+%.o: %.c
+	@echo "CC $@"
+	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(objs) $(lib)
+	@echo "clean"
+	$(Q)rm -f $(targets) $(objs) $(deps)
+
