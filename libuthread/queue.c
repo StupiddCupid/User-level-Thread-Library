@@ -114,7 +114,15 @@ int queue_delete(queue_t queue, void *data)
         // if current node contains the data, delete and free the node
         if (currNode->key == data) {
             dataFound = 1;
-            prevNode->next = currNode->next;
+            if(currNode == queue->front) {
+                queue->front = currNode->next;
+            }
+            else if (currNode == queue->tail) {
+                queue->tail = prevNode;
+            }
+            else {
+                prevNode->next = currNode->next;
+            }
             free(currNode);
             break;
         }
