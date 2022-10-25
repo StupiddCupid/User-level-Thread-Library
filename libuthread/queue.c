@@ -4,23 +4,64 @@
 
 #include "queue.h"
 
-struct queue {
-	/* TODO Phase 1 */
+struct queue 
+{
+	int length;
+    struct Node*front, *tail;
+};
+
+struct Node
+{
+    void *key;
+    struct Node* next;
+};
+
+struct Node* newNode(void* value)
+{
+    struct Node* newnode = (struct Node*) malloc (sizeof(struct Node));
+    newnode->key = value;
+    newnode->next = NULL;
+    return newnode;
 };
 
 queue_t queue_create(void)
 {
-	/* TODO Phase 1 */
+    struct queue* myQueue = (struct queue*) malloc(sizeof(struct queue));
+    myQueue->front = NULL;
+    myQueue->tail = NULL;
+    if (myQueue == NULL){
+        return NULL;
+    }
+    return myQueue;
 }
 
 int queue_destroy(queue_t queue)
 {
-	/* TODO Phase 1 */
+	if (queue == NULL || queue->length > 0){
+        return -1;
+    }
+    free(queue);
+    return 0;
 }
 
 int queue_enqueue(queue_t queue, void *data)
 {
-	/* TODO Phase 1 */
+    //if queue is null or data is null
+    if (queue->tail == NULL || data == NULL){
+        return -1;
+    }
+
+    //create a new node, return -1 if fail to create new node
+    struct Node* new_Node = newNode(data);
+    if (new_Node == NULL){
+        return -1;
+    }
+
+    //add new node to the end of the queue and change the tail
+    queue->tail->next = new_Node;
+    queue->tail = new_Node;
+    return 0;
+	
 }
 
 int queue_dequeue(queue_t queue, void **data)
@@ -42,4 +83,3 @@ int queue_length(queue_t queue)
 {
 	/* TODO Phase 1 */
 }
-
