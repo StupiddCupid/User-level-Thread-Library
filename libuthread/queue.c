@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>//delete when submit
 #include "queue.h"
 
 struct queue 
@@ -27,11 +27,10 @@ struct Node* newNode(void* value)
 queue_t queue_create(void)
 {
     struct queue* myQueue = (struct queue*) malloc(sizeof(struct queue));
-    myQueue->front = NULL;
-    myQueue->tail = NULL;
     if (myQueue == NULL){
         return NULL;
     }
+    myQueue->length = 0;
     return myQueue;
 }
 
@@ -56,22 +55,39 @@ int queue_destroy(queue_t queue)
  */
 int queue_enqueue(queue_t queue, void *data)
 {
+
     //if queue is null or data is null
-    if (queue->tail == NULL || data == NULL){
+    if (queue == NULL || data == NULL){
         return -1;
     }
 
-    //create a new node, return -1 if fail to create new node
+    //create a new node, return -1 if fails to create new node
     struct Node* new_Node = newNode(data);
+
     if (new_Node == NULL){
         return -1;
     }
 
-    //add new node to the end of the queue and change the tail
+    //add new node if queue is empty
+    if (queue->length == 0){
+        printf("The key in queue is %d\n", *(int *)data);
+        queue->front = new_Node;
+        struct Node* tail_Node = newNode(data);
+        queue->tail = tail_Node;
+        queue->length += 1;
+        printf("The key in front is %d\n", *(int *)queue->front->key);
+        printf("The key in tail is %d\n", *(int *)queue->tail->key);
+        return 0;
+
+    }
+    //add new node if queue is !empty
     queue->tail->next = new_Node;
-    queue->tail = new_Node;
+    queue->tail = queue->tail->next;
+    queue->length += 1;
+    printf("The new node in tail is %d\n", *(int *)queue->tail->key);
+    printf("The new node in front is %d\n", *(int *)queue->front->key);
     return 0;
-	
+
 }
 
 /*
@@ -88,9 +104,25 @@ int queue_enqueue(queue_t queue, void *data)
 int queue_dequeue(queue_t queue, void **data)
 {
     if(queue == NULL || data == NULL || queue->length == 0) return -1;
+
+    //grap the node
     struct Node *frontNode = queue->front;
+    *data = frontNode->key;
+    
+    
+    if(queue->length == 1) {
+        printf("Here !!!!!\n");
+        free(queue->front);
+        free(queue->tail);
+        return 0;
+    }
+    
     queue->front = queue->front->next;
-    data = frontNode->key;
+    queue->length -= 1;
+    free(frontNode);
+    printf("Tail in tail is %d\n", *(int *)queue->tail->key);
+    printf("New front in front is %d\n", *(int *)queue->front->key);
+
     return 0;
 }
 
