@@ -110,13 +110,16 @@ int queue_delete(queue_t queue, void *data)
 	if (queue == NULL || data == NULL) return -1;
     struct Node *prevNode = queue->front, *currNode = queue->front;
     int dataFound = 0;
-    for(int i = 0; i < queue->length; i++) {
+    while(currNode != NULL) {
+        // if current node contains the data, delete and free the node
         if (currNode->key == data) {
             dataFound = 1;
             prevNode->next = currNode->next;
             free(currNode);
             break;
         }
+        prevNode = currNode;
+        currNode = currNode->next;
     }
     if (dataFound == 0) return -1;
     else return 0;
@@ -139,8 +142,10 @@ int queue_delete(queue_t queue, void *data)
 int queue_iterate(queue_t queue, queue_func_t func)
 {
 	if(queue== NULL || func == NULL) return -1;
-    for(int i = 0; i < queue->length; i++) {
-
+    struct Node *currNode = queue->front;
+    while(currNode != NULL) {
+        func(queue, currNode->key);
+        currNode = currNode->next;
     }
 
     return 0;
