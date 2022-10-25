@@ -80,12 +80,19 @@ int queue_enqueue(queue_t queue, void *data)
         return 0;
 
     }
+    if (queue->length == 1){
+        queue->tail->next = new_Node;
+        queue->tail = queue->tail->next;
+        queue->front->next = queue->tail;
+        queue->length += 1;
+        return 0;
+    }
     //add new node if queue is !empty
     queue->tail->next = new_Node;
     queue->tail = queue->tail->next;
     queue->length += 1;
-    printf("The new node in tail is %d\n", *(int *)queue->tail->key);
-    printf("The new node in front is %d\n", *(int *)queue->front->key);
+    // printf("The new node in tail is %d\n", *(int *)queue->tail->key);
+    // printf("The new node in front is %d\n", *(int *)queue->front->key);
     return 0;
 
 }
@@ -103,26 +110,23 @@ int queue_enqueue(queue_t queue, void *data)
  */
 int queue_dequeue(queue_t queue, void **data)
 {
+    printf("The key in tail is %d\n", *(int *)queue->tail->key);
     if(queue == NULL || data == NULL || queue->length == 0) return -1;
 
-    //grap the node
-    struct Node *frontNode = queue->front;
-    *data = frontNode->key;
-    
-    
+    //grap the node    
     if(queue->length == 1) {
-        printf("Here !!!!!\n");
         free(queue->front);
         free(queue->tail);
         return 0;
     }
     
+    // printf("New front in front is %d\n", *(int *)queue->front->key);
+    *data = queue->front->key;
+    struct Node *frontNode = queue->front;
     queue->front = queue->front->next;
-    queue->length -= 1;
     free(frontNode);
-    printf("Tail in tail is %d\n", *(int *)queue->tail->key);
-    printf("New front in front is %d\n", *(int *)queue->front->key);
-
+    queue->length -= 1;
+    
     return 0;
 }
 
