@@ -12,7 +12,8 @@
 typedef enum {
 	READY,
 	RUNNING,
-
+	BROCKED,
+	EXITED
 } state;
 
 struct uthread_tcb {
