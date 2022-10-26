@@ -69,9 +69,26 @@ int uthread_create(uthread_func_t func, void *arg)
 	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
 	myThread -> stack_ptr = uthread_ctx_alloc_stack();
 	myThread -> thread_state = READY;
-	uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
+	int retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
+	if (myThread->stack_ptr == NULL || retval == 0) return -1;
+	else return 0;
 }
 
+/*
+ * uthread_run - Run the multithreading library
+ * @preempt: Preemption enable
+ * @func: Function of the first thread to start
+ * @arg: Argument to be passed to the first thread
+ *
+ * This function should only be called by the process' original execution
+ * thread. It starts the multithreading scheduling library, and becomes the
+ * "idle" thread. It returns once all the threads have finished running.
+ *
+ * If @preempt is `true`, then preemptive scheduling is enabled.
+ *
+ * Return: 0 in case of success, -1 in case of failure (e.g., memory allocation,
+ * context creation).
+ */
 int uthread_run(uthread_func_t func, void *arg)
 {
 	/* TODO Phase 2 */
