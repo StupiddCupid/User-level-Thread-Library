@@ -81,8 +81,10 @@ int uthread_create(uthread_func_t func, void *arg)
 {
 	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
 	myThread -> stack_ptr = uthread_ctx_alloc_stack();
-	myThread -> thread_state = 0;
-	uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
+	myThread -> thread_state = READY;
+	int retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
+	if (myThread->stack_ptr == NULL || retval == 0) return -1;
+	else return 0;
 }
 
 /*
