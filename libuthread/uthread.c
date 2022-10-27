@@ -11,8 +11,9 @@
 #include "queue.h"
 
 //global ptr pointing to the front of the queue
-queue_t my_thread_Queue;
+struct queue* my_thread_Queue;
 static struct uthread_tcb *current_thread;
+static struct uthread_tcb idle_thread;
 
 typedef enum {
 	READY,
@@ -41,13 +42,19 @@ struct uthread_tcb *uthread_current(void)
  */
 void uthread_yield(void)
 {
-	//dequeue the curr(make it wait) and enqueue it into the end of the queue
-	void* yield_thread;
-	queue_dequeue(my_thread_Queue, yield_thread);
-	queue_enqueue(my_thread_Queue, yield_thread);
-	current_thread = (struct uthread_tcb *)my_thread_Queue->front; 
-	//reset the state
+	//Make current thread "READY" and Enqueue it into queue
+	current_thread->thread_state = 0;
+	queue_enqueue(my_thread_Queue, current_thread);
+
+	//Get the head of the queue
+	struct uthread_tcb *Next_thread;
+	queue_dequeue(my_thread_Queue, (void**)&Next_thread);
+	struct uthread_tcb *Curr_thread_ptr = current_thread;
+
+	//Context switch 
+	current_thread = Next_thread;
 	current_thread->thread_state = 1;
+	uthread_ctx_switch(Curr_thread_ptr->context_ptr, Next_thread->context_ptr);
 
 }
 
@@ -61,7 +68,12 @@ void uthread_yield(void)
  */
 void uthread_exit(void)
 {
-	/* TODO Phase 2 */
+	//Make current thread "EXITED"
+	current_thread->thread_state = 3;
+	//Get the head of the queue to be the current thread
+	queue_dequeue(my_thread_Queue, current_thread);
+	current_thread->thread_state = 1;
+	
 }
 
 
@@ -80,11 +92,13 @@ void uthread_exit(void)
 int uthread_create(uthread_func_t func, void *arg)
 {
 	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
-	myThread->stack_ptr = uthread_ctx_alloc_stack();
-	myThread->thread_state = READY;
 	int retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
-	if (myThread->stack_ptr == NULL || retval == 0) return -1;
-	else return 0;
+	myThread -> stack_ptr = uthread_ctx_alloc_stack();
+	if (myThread->stack_ptr == NULL || retval == -1) return -1;
+	myThread -> thread_state = 0;
+
+	if(queue_enqueue(my_thread_Queue, current_thread) == -1) return -1;
+	return 0;
 }
 
 /*
@@ -104,17 +118,18 @@ int uthread_create(uthread_func_t func, void *arg)
  */
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	current_thread = uthread_create(func, arg);
+	if (my_thread_Queue == NULL) my_thread_Queue = queue_create();
+	//clear the idle thread, background thread
+	current_thread = &idle_thread;
+	free(current_thread);
 
-	//If it is the initial thread, create it and put it into queue.
-	if (my_thread_Queue == NULL){
-		my_thread_Queue = queue_create();
-		if (my_thread_Queue == NULL) return -1;
-		if (queue_enqueue(my_thread_Queue, current_thread) == -1) return -1;
-		return 0;	
+	uthread_create(func, arg);
+
+	while (1){
+		uthread_yield();
+		if (queue_length(my_thread_Queue) == 0)return 0;
 	}
-	queue_enqueue(my_thread_Queue, current_thread);
-	return 0;
+	//free the queue
 }
 
 void uthread_block(void)
