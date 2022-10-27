@@ -8,23 +8,29 @@
 
 #include "private.h"
 #include "uthread.h"
+#include "queue.h"
+
+//global ptr pointing to the front of the queue
+struct queue* my_thread_Queue;
+static struct uthread_tcb *current_thread;
 
 typedef enum {
 	READY,
 	RUNNING,
-	BROCKED,
+	BLOCKED,
 	EXITED
 } state;
 
 struct uthread_tcb {
-	void *context_ptr;
+	uthread_ctx_t *context_ptr;
 	void *stack_ptr;
 	state thread_state;
 };
 
 struct uthread_tcb *uthread_current(void)
 {
-	/* TODO Phase 2/4 */
+	//return the current thread
+	return current_thread;
 }
 
 /*
@@ -35,7 +41,14 @@ struct uthread_tcb *uthread_current(void)
  */
 void uthread_yield(void)
 {
-	/* TODO Phase 2 */
+	//dequeue the curr(make it wait) and enqueue it into the end of the queue
+	void* yield_thread;
+	queue_dequeue(my_thread_Queue, yield_thread);
+	queue_enqueue(my_thread_Queue, yield_thread);
+	current_thread = (uthread_tcb *)*my_thread_Queue;ßß
+	//reset the state
+	current_thread->thread_state = 1;
+
 }
 
 /*
@@ -68,10 +81,8 @@ int uthread_create(uthread_func_t func, void *arg)
 {
 	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
 	myThread -> stack_ptr = uthread_ctx_alloc_stack();
-	myThread -> thread_state = READY;
-	int retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
-	if (myThread->stack_ptr == NULL || retval == 0) return -1;
-	else return 0;
+	myThread -> thread_state = 0;
+	uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
 }
 
 /*
@@ -89,9 +100,19 @@ int uthread_create(uthread_func_t func, void *arg)
  * Return: 0 in case of success, -1 in case of failure (e.g., memory allocation,
  * context creation).
  */
-int uthread_run(uthread_func_t func, void *arg)
+int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	/* TODO Phase 2 */
+	current_thread = uthread_create(func, arg);
+
+	//If it is the initial thread, create it and put it into queue.
+	if (my_thread_Queue == NULL){
+		my_thread_Queue = queue_create();
+		if (my_thread_Queue == NULL) return -1;
+		if (queue_enqueue(my_thread_Queue, current_thread) == -1) return -1;
+		return 0;	
+	}
+	queue_enqueue(my_thread_Queue, current_thread);
+	return 0;
 }
 
 void uthread_block(void)
