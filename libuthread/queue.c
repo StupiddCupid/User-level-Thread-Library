@@ -112,7 +112,7 @@ int queue_dequeue(queue_t queue, void **data)
 {
     printf("The key in tail is %d\n", *(int *)queue->tail->key);
     if(queue == NULL || data == NULL || queue->length == 0) return -1;
-
+    
     //grap the node    
     if(queue->length == 1) {
         free(queue->front);

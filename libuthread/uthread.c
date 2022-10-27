@@ -11,7 +11,7 @@
 #include "queue.h"
 
 //global ptr pointing to the front of the queue
-struct queue* my_thread_Queue;
+queue_t my_thread_Queue;
 static struct uthread_tcb *current_thread;
 
 typedef enum {
@@ -45,7 +45,7 @@ void uthread_yield(void)
 	void* yield_thread;
 	queue_dequeue(my_thread_Queue, yield_thread);
 	queue_enqueue(my_thread_Queue, yield_thread);
-	current_thread = (uthread_tcb *)*my_thread_Queue;ßß
+	current_thread = (struct uthread_tcb *)my_thread_Queue->front; 
 	//reset the state
 	current_thread->thread_state = 1;
 
