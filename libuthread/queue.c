@@ -78,8 +78,9 @@ int queue_enqueue(queue_t queue, void *data)
         printf("The key in front is %d\n", *(int *)queue->front->key);
         printf("The key in tail is %d\n", *(int *)queue->tail->key);
         return 0;
-
     }
+
+    //add new node if len(queue) is 1
     if (queue->length == 1){
         queue->tail->next = new_Node;
         queue->tail = queue->tail->next;
@@ -87,7 +88,7 @@ int queue_enqueue(queue_t queue, void *data)
         queue->length += 1;
         return 0;
     }
-    //add new node if queue is !empty
+    //add new node if len(queue) > 1 
     queue->tail->next = new_Node;
     queue->tail = queue->tail->next;
     queue->length += 1;
@@ -110,17 +111,18 @@ int queue_enqueue(queue_t queue, void *data)
  */
 int queue_dequeue(queue_t queue, void **data)
 {
-    printf("The key in tail is %d\n", *(int *)queue->tail->key);
     if(queue == NULL || data == NULL || queue->length == 0) return -1;
-    
-    //grap the node    
+
+    //if only one node left in the queue
     if(queue->length == 1) {
-        free(queue->front);
-        free(queue->tail);
+        struct Node *currNode = queue->front;
+        *data = currNode->key;
+        free(currNode);
+        queue->front = NULL;
+        queue->length = 0;
         return 0;
     }
     
-    // printf("New front in front is %d\n", *(int *)queue->front->key);
     *data = queue->front->key;
     struct Node *frontNode = queue->front;
     queue->front = queue->front->next;
@@ -160,6 +162,7 @@ int queue_delete(queue_t queue, void *data)
                 prevNode->next = currNode->next;
             }
             free(currNode);
+            queue->length -= 1;
             break;
         }
         prevNode = currNode;
