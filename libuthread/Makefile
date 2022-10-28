@@ -1,5 +1,5 @@
 targets := libuthread.a
-objs    := queue.o
+objs    := queue.o uthread.o context.o #sem.o preempt.o
 
 CC      := gcc
 CFLAGS  := -Wall -Wextra -Werror -MMD
@@ -21,6 +21,7 @@ all: $(targets)
 %.o: %.c
 	@echo "CC $@"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
+
 
 clean:
 	@echo "clean"
