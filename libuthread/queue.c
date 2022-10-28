@@ -1,205 +1,151 @@
+#define _XOPEN_SOURCE 600
+#include <assert.h>
+#include <signal.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>//delete when submit
+#include <sys/time.h>
+
+#include "private.h"
+#include "uthread.h"
 #include "queue.h"
 
-struct queue 
-{
-	int length;
-    struct Node *front, *tail;
+//global ptr pointing to the front of the queue
+struct queue* my_thread_Queue;
+static struct uthread_tcb *current_thread;
+static struct uthread_tcb *idle_thread;
+
+typedef enum {
+	READY,
+	RUNNING,
+	BLOCKED,
+	EXITED
+} state;
+
+struct uthread_tcb {
+	uthread_ctx_t *context_ptr;
+	void *stack_ptr;
+	state thread_state;
 };
 
-struct Node
+struct uthread_tcb *uthread_current(void)
 {
-    void *key;
-    struct Node* next;
-};
-
-struct Node* newNode(void* value)
-{
-    struct Node* newnode = (struct Node*) malloc (sizeof(struct Node));
-    newnode->key = value;
-    newnode->next = NULL;
-    return newnode;
-};
-
-queue_t queue_create(void)
-{
-    struct queue* myQueue = (struct queue*) malloc(sizeof(struct queue));
-    if (myQueue == NULL){
-        return NULL;
-    }
-    myQueue->length = 0;
-    return myQueue;
-}
-
-int queue_destroy(queue_t queue)
-{
-	if (queue == NULL || queue->length > 0){
-        return -1;
-    }
-    free(queue);
-    return 0;
+	//return the current thread
+	return current_thread;
 }
 
 /*
- * queue_enqueue - Enqueue data item
- * @queue: Queue in which to enqueue item
- * @data: Address of data item to enqueue
+ * uthread_yield - Yield execution
  *
- * Enqueue the address contained in @data in the queue @queue.
- *
- * Return: -1 if @queue or @data are NULL, or in case of memory allocation error
- * when enqueing. 0 if @data was successfully enqueued in @queue.
+ * This function is to be called from the currently active and running thread in
+ * order to yield for other threads to execute.
  */
-int queue_enqueue(queue_t queue, void *data)
+void uthread_yield(void)
 {
+	//Make current thread "READY" and Enqueue it into queue
+	current_thread->thread_state = 0;
+	queue_enqueue(my_thread_Queue, (void*)&current_thread);
 
-    //if queue is null or data is null
-    if (queue == NULL || data == NULL){
-        return -1;
-    }
-
-    //create a new node, return -1 if fails to create new node
-    struct Node* new_Node = newNode(data);
-
-    if (new_Node == NULL){
-        return -1;
-    }
-
-    //add new node if queue is empty
-    if (queue->length == 0){
-        printf("The key in queue is %d\n", *(int *)data);
-        queue->front = new_Node;
-        struct Node* tail_Node = newNode(data);
-        queue->tail = tail_Node;
-        queue->length += 1;
-        printf("The key in front is %d\n", *(int *)queue->front->key);
-        printf("The key in tail is %d\n", *(int *)queue->tail->key);
-        return 0;
-    }
-
-    //add new node if len(queue) is 1
-    if (queue->length == 1){
-        queue->tail->next = new_Node;
-        queue->tail = queue->tail->next;
-        queue->front->next = queue->tail;
-        queue->length += 1;
-        return 0;
-    }
-    //add new node if len(queue) > 1 
-    queue->tail->next = new_Node;
-    queue->tail = queue->tail->next;
-    queue->length += 1;
-    // printf("The new node in tail is %d\n", *(int *)queue->tail->key);
-    // printf("The new node in front is %d\n", *(int *)queue->front->key);
-    return 0;
+	//Get the head of the queue
+	struct uthread_tcb *Next_thread;
+	queue_dequeue(my_thread_Queue, (void**)&Next_thread);
+	struct uthread_tcb *Curr_thread_ptr = current_thread;
+	
+	//Context switch 
+	current_thread = Next_thread;
+	current_thread->thread_state = 1;
+	uthread_ctx_switch(Curr_thread_ptr->context_ptr, Next_thread->context_ptr);
 
 }
 
 /*
- * queue_dequeue - Dequeue data item
- * @queue: Queue in which to dequeue item
- * @data: Address of data pointer where item is received
+ * uthread_exit - Exit from currently running thread
  *
- * Remove the oldest item of queue @queue and assign this item (the value of a
- * pointer) to @data.
+ * This function is to be called from the currently active and running thread in
+ * order to finish its execution.
  *
- * Return: -1 if @queue or @data are NULL, or if the queue is empty. 0 if @data
- * was set with the oldest item available in @queue.
+ * This function shall never return.
  */
-int queue_dequeue(queue_t queue, void **data)
+void uthread_exit(void)
 {
-    if(queue == NULL || data == NULL || queue->length == 0) return -1;
+	//Make current thread "EXITED"
+	current_thread->thread_state = 3;
+	uthread_ctx_destroy_stack(current_thread->stack_ptr);
+	//Get the head of the queue to be the current thread
+	queue_dequeue(my_thread_Queue, (void**)&current_thread);
+	current_thread->thread_state = 1;
+	
+}
 
-    //if only one node left in the queue
-    if(queue->length == 1) {
-        struct Node *currNode = queue->front;
-        *data = currNode->key;
-        free(currNode);
-        queue->front = NULL;
-        queue->length = 0;
-        return 0;
-    }
-    
-    *data = queue->front->key;
-    struct Node *frontNode = queue->front;
-    queue->front = queue->front->next;
-    free(frontNode);
-    queue->length -= 1;
-    
-    return 0;
+
+/*
+ * uthread_create - Create a new thread
+ * @func: Function to be executed by the thread
+ * @arg: Argument to be passed to the thread
+ *
+ * This function creates a new thread running the function @func to which
+ * argument @arg is passed.
+ *
+ * Return: 0 in case of success, -1 in case of failure (e.g., memory allocation,
+ * context creation).
+ */
+
+int uthread_create(uthread_func_t func, void *arg)
+{
+	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
+
+	int retval = 0;
+	myThread->stack_ptr = uthread_ctx_alloc_stack();
+	myThread->context_ptr = NULL;
+	retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
+	myThread -> stack_ptr = uthread_ctx_alloc_stack();
+	if (myThread->stack_ptr == NULL || retval == -1) return -1;
+	myThread -> thread_state = 0;
+
+	if(queue_enqueue(my_thread_Queue, (void*)&current_thread) == -1) return -1;
+	return 0;
 }
 
 /*
- * queue_delete - Delete data item
- * @queue: Queue in which to delete item
- * @data: Data to delete
+ * uthread_run - Run the multithreading library
+ * @preempt: Preemption enable
+ * @func: Function of the first thread to start
+ * @arg: Argument to be passed to the first thread
  *
- * Find in queue @queue, the first (ie oldest) item equal to @data and delete
- * this item.
+ * This function should only be called by the process' original execution
+ * thread. It starts the multithreading scheduling library, and becomes the
+ * "idle" thread. It returns once all the threads have finished running.
  *
- * Return: -1 if @queue or @data are NULL, of if @data was not found in the
- * queue. 0 if @data was found and deleted from @queue.
+ * If @preempt is `true`, then preemptive scheduling is enabled.
+ *
+ * Return: 0 in case of success, -1 in case of failure (e.g., memory allocation,
+ * context creation).
  */
-int queue_delete(queue_t queue, void *data)
+int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	if (queue == NULL || data == NULL) return -1;
-    struct Node *prevNode = queue->front, *currNode = queue->front;
-    int dataFound = 0;
-    while(currNode != NULL) {
-        // if current node contains the data, delete and free the node
-        if (currNode->key == data) {
-            dataFound = 1;
-            if(currNode == queue->front) {
-                queue->front = currNode->next;
-            }
-            else if (currNode == queue->tail) {
-                queue->tail = prevNode;
-            }
-            else {
-                prevNode->next = currNode->next;
-            }
-            free(currNode);
-            queue->length -= 1;
-            break;
-        }
-        prevNode = currNode;
-        currNode = currNode->next;
-    }
-    if (dataFound == 0) return -1;
-    else return 0;
+	if (preempt == true) return 0;
+	if (my_thread_Queue == NULL) my_thread_Queue = queue_create();
+	//clear the idle thread, background thread
+	current_thread = idle_thread;
+	free(current_thread);
+
+	uthread_create(func, arg);
+
+	while (1){
+		uthread_yield();
+		if (queue_length(my_thread_Queue) == 0)return 0;
+	}
+	//free the queue
 }
 
-/*
- * queue_iterate - Iterate through a queue
- * @queue: Queue to iterate through
- * @func: Function to call on each queue item
- *
- * This function iterates through the items in the queue @queue, from the oldest
- * item to the newest item, and calls the given callback function @func on each
- * item. The callback function receives the current data item as parameter.
- *
- * Note that this function should be resistant to data items being deleted
- * as part of the iteration (ie in @func).
- *
- * Return: -1 if @queue or @func are NULL, 0 otherwise.
- */
-int queue_iterate(queue_t queue, queue_func_t func)
+void uthread_block(void)
 {
-	if(queue== NULL || func == NULL) return -1;
-    struct Node *currNode = queue->front;
-    while(currNode != NULL) {
-        func(queue, currNode->key);
-        currNode = currNode->next;
-    }
-
-    return 0;
+	/* TODO Phase 4 */
 }
 
-int queue_length(queue_t queue)
+void uthread_unblock(struct uthread_tcb *uthread)
 {
-    if (queue == NULL) return -1;
-    else return queue->length;
+	uthread = NULL;
 }
+
