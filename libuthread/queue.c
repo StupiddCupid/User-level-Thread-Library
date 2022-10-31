@@ -57,6 +57,7 @@ int queue_destroy(queue_t queue)
 int queue_enqueue(queue_t queue, void *data)
 {
     //if queue is null or data is null
+
     if (queue == NULL || data == NULL){
         return -1;
     }
@@ -67,10 +68,10 @@ int queue_enqueue(queue_t queue, void *data)
     if (new_node == NULL){
         return -1;
     }
+    // printf("The key in queue is %d\n", *(int *)data);
 
     //add new node if queue is empty
     if (queue->length == 0){
-        printf("The key in queue is %d\n", *(int *)data);
         queue->front = new_node;
         queue->tail = new_node;
         queue->length += 1;
@@ -194,9 +195,9 @@ int queue_delete(queue_t queue, void *data)
 int queue_iterate(queue_t queue, queue_func_t func)
 {
 	if(queue== NULL || func == NULL) return -1;
-    struct Node *curr_node = queue->front, next_node = queue->front->next;
+    struct Node *curr_node = queue->front, *next_node = queue->front->next;
     while(curr_node != NULL) {
-        func(queue, curr_node_copy->key);
+        func(queue, curr_node->key);
         if (next_node != NULL) {
             // if version 1 and version 2 mean the same thing, use version 1
             // version 1
