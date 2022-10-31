@@ -43,6 +43,7 @@ struct uthread_tcb *uthread_current(void)
  */
 void uthread_yield(void)
 {
+	// printf("Curr thread has addr of %p\n", current_thread->context_ptr);
 	//Make current thread "READY" and Enqueue it into queue
 	if (current_thread == NULL){
 		struct uthread_tcb *IDLE_thread;
@@ -61,7 +62,6 @@ void uthread_yield(void)
 	current_thread = Next_thread;
 	current_thread->thread_state = 1;
 	uthread_ctx_switch(Curr_thread_ptr->context_ptr, Next_thread->context_ptr);	
-
 }
 
 /*
@@ -77,9 +77,15 @@ void uthread_exit(void)
 	//Make current thread "EXITED"
 	current_thread->thread_state = 3;
 	uthread_ctx_destroy_stack(current_thread->stack_ptr);
-	//Get the head of the queue to be the current thread
-	queue_dequeue(Ready_Queue, (void**)&current_thread);
+	printf("I'm gonna die -----------------\n");
+	struct uthread_tcb *Next_thread_ptr;
+	queue_dequeue(Ready_Queue, (void**)&Next_thread_ptr);
+	struct uthread_tcb *Current_thread_ptr = current_thread;
+	
+	//Context switch 
+	current_thread = Next_thread_ptr;
 	current_thread->thread_state = 1;
+	uthread_ctx_switch(Current_thread_ptr->context_ptr, Next_thread_ptr->context_ptr);	
 	
 }
 
@@ -108,7 +114,7 @@ int uthread_create(uthread_func_t func, void *arg)
 	if (myThread->stack_ptr == NULL || retval == -1) return -1;
 	
 	queue_enqueue(Ready_Queue, (void*)myThread);
-	printf("Length of queue is %d \n", queue_length(Ready_Queue));
+	// printf("Length of queue is %d \n", queue_length(Ready_Queue));
 	return 0;
 }
 
@@ -140,10 +146,9 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 
 	while (1){
 		uthread_yield();
-		printf("Curr thread has addr of %p\n", current_thread->context_ptr);
-		printf("The length of queue is %d\n", queue_length(Ready_Queue));
-		if (queue_length(Ready_Queue) == 0)return 0;
+		if (queue_length(Ready_Queue) == 0) break;
 	}
+	return 0;
 	//free the queue
 }
 
