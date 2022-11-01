@@ -56,45 +56,40 @@ int queue_destroy(queue_t queue)
  */
 int queue_enqueue(queue_t queue, void *data)
 {
-
     //if queue is null or data is null
+
     if (queue == NULL || data == NULL){
         return -1;
     }
 
     //create a new node, return -1 if fails to create new node
-    struct Node* new_Node = newNode(data);
+    struct Node* new_node = newNode(data);
 
-    if (new_Node == NULL){
+    if (new_node == NULL){
         return -1;
     }
+    // printf("The key in queue is %d\n", *(int *)data);
 
     //add new node if queue is empty
     if (queue->length == 0){
-        printf("The key in queue is %d\n", *(int *)data);
-        queue->front = new_Node;
-        struct Node* tail_Node = newNode(data);
-        queue->tail = tail_Node;
+        queue->front = new_node;
+        queue->tail = new_node;
         queue->length += 1;
-        printf("The key in front is %d\n", *(int *)queue->front->key);
-        printf("The key in tail is %d\n", *(int *)queue->tail->key);
         return 0;
     }
 
     //add new node if len(queue) is 1
     if (queue->length == 1){
-        queue->tail->next = new_Node;
-        queue->tail = queue->tail->next;
-        queue->front->next = queue->tail;
+        queue->tail = new_node;
+        queue->front->next = new_node;
         queue->length += 1;
         return 0;
     }
+
     //add new node if len(queue) > 1 
-    queue->tail->next = new_Node;
-    queue->tail = queue->tail->next;
+    queue->tail->next = new_node;
+    queue->tail = new_node;
     queue->length += 1;
-    // printf("The new node in tail is %d\n", *(int *)queue->tail->key);
-    // printf("The new node in front is %d\n", *(int *)queue->front->key);
     return 0;
 
 }
@@ -116,9 +111,9 @@ int queue_dequeue(queue_t queue, void **data)
 
     //if only one node left in the queue
     if(queue->length == 1) {
-        struct Node *currNode = queue->front;
-        *data = currNode->key;
-        free(currNode);
+        struct Node *curr_node = queue->front;
+        *data = curr_node->key;
+        free(curr_node);
         queue->front = NULL;
         queue->length = 0;
         return 0;
@@ -147,28 +142,37 @@ int queue_dequeue(queue_t queue, void **data)
 int queue_delete(queue_t queue, void *data)
 {
 	if (queue == NULL || data == NULL) return -1;
-    struct Node *prevNode = queue->front, *currNode = queue->front;
+    struct Node *prev_node = queue->front, *curr_node = queue->front;
     int dataFound = 0;
-    while(currNode != NULL) {
+
+    while(curr_node != NULL) {
         // if current node contains the data, delete and free the node
-        if (currNode->key == data) {
+        if (curr_node->key == data) {
             dataFound = 1;
-            if(currNode == queue->front) {
-                queue->front = currNode->next;
+            if(curr_node == queue->front) {
+                queue->front = curr_node->next;
             }
-            else if (currNode == queue->tail) {
-                queue->tail = prevNode;
+            else if (curr_node == queue->tail) {
+                queue->tail = prev_node;
             }
             else {
-                prevNode->next = currNode->next;
+                prev_node->next = curr_node->next;
             }
-            free(currNode);
+            free(curr_node);
             queue->length -= 1;
             break;
         }
-        prevNode = currNode;
-        currNode = currNode->next;
+        else {
+            if (curr_node->next == NULL) break;
+            else {
+                prev_node = curr_node;
+                curr_node = curr_node->next;
+            }
+        }
     }
+    curr_node->next = NULL;
+    curr_node = NULL;
+    prev_node = NULL;
     if (dataFound == 0) return -1;
     else return 0;
 }
@@ -190,12 +194,15 @@ int queue_delete(queue_t queue, void *data)
 int queue_iterate(queue_t queue, queue_func_t func)
 {
 	if(queue== NULL || func == NULL) return -1;
-    struct Node *currNode = queue->front;
-    while(currNode != NULL) {
-        func(queue, currNode->key);
-        currNode = currNode->next;
+    struct Node *curr_node = queue->front, *next_node = queue->front->next;
+    while(curr_node != NULL) {
+        func(queue, curr_node->key);
+        if (next_node != NULL) {
+            curr_node = next_node;
+            next_node = next_node->next;
+        }
+        else break;
     }
-
     return 0;
 }
 
