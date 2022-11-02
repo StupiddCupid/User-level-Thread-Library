@@ -1,4 +1,4 @@
-# Project 1 Report: Simple Shell 🐌
+# Project 1 Report: User-level Thread Library 📚
 
 # Summary 🌟
 
@@ -84,7 +84,7 @@ type and content of arguments. We use if statement to check the type of the comm
 the command into corresponding categories function to do the actual execution.
                                                  
                       
-# Limitations🌟
+#Limitations🌟
 Although our simple shell can do majority of the commands, we still have not figured out how to implement pipeline.
 We tried to do it using linked list, but we failed at this moment. Thus, we have to continue working on it.
    
