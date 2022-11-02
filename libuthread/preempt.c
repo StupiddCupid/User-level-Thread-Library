@@ -16,8 +16,12 @@
  */
 #define HZ 100
 
+struct sigaction new_action, old_action;
+struct itimerval new_timer, old_timer;
+sigset_t block_alarm;
+
 /*
- * preempt_disable - Disable preemption
+ * preempt_dinew_actionble - Dinew_actionble preemption
  */
 void preempt_disable(void)
 {
@@ -49,28 +53,22 @@ void alarm_handler(int signum)
 
 void preempt_start(bool preempt)
 {
-	struct sigaction sa;
+	struct sigaction new_action, old_action;
 
     /* Set up handler for alarm */
-    sa.sa_handler = alarm_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGALRM, &sa, NULL);
+    new_action.new_action_handler = alarm_handler;
+    sigemptyset(&new_action.new_action_mask);
+    new_action.new_action_flags = 0;
+    sigaction(SIGVTALRM, &new_action, &old_action);
 
     /* Configure alarm */
     struct itimerval it_val;
-
-    it_val.it_value.tv_sec = 1;
-    it_val.it_value.tv_usec = 0;
+    it_val.it_value.tv_sec = 0;
+    it_val.it_value.tv_usec = 1000000 / HZ;
     it_val.it_interval = it_val.it_value;
     if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
         perror("error calling setitimer()");
         exit(1);
-    }
-
-    begin = clock();
-    while(1) {
-        pause();
     }
 }
 
