@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "private.h"
 #include "uthread.h"
@@ -41,10 +42,36 @@ void preempt_enable(void)
  * If @preempt is false, don't start preemption; all the other functions from
  * the preemption API should then be ineffective.
  */
+void alarm_handler(int signum)
+{
+    uthread_yield();
+}
+
 void preempt_start(bool preempt)
 {
-	if (preempt) printf("start thread preemption\n");
-	/* TODO Phase 4 */
+	struct sigaction sa;
+
+    /* Set up handler for alarm */
+    sa.sa_handler = alarm_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGALRM, &sa, NULL);
+
+    /* Configure alarm */
+    struct itimerval it_val;
+
+    it_val.it_value.tv_sec = 1;
+    it_val.it_value.tv_usec = 0;
+    it_val.it_interval = it_val.it_value;
+    if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
+        perror("error calling setitimer()");
+        exit(1);
+    }
+
+    begin = clock();
+    while(1) {
+        pause();
+    }
 }
 
 /*
