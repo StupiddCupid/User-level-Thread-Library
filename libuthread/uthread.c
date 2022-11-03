@@ -12,7 +12,7 @@
 #include "queue.h"
 
 static struct queue *Ready_Queue;
-static struct queue *Exited_Queue;
+// static struct queue *Exited_Queue;
 static struct uthread_tcb *current_thread;
 static struct uthread_tcb *idle_thread;
 
@@ -37,6 +37,7 @@ struct uthread_tcb *uthread_current(void)
 void uthread_yield(void)
 {
 	//Make current thread "READY" and Enqueue it into queue
+	preempt_disable();
 	if (current_thread == NULL){
 		struct uthread_tcb *IDLE_thread;
 		queue_dequeue(Ready_Queue, (void**)&IDLE_thread);
@@ -46,63 +47,74 @@ void uthread_yield(void)
 	queue_enqueue(Ready_Queue, (void*)current_thread);
 
 	//Get the head of the queue
-	struct uthread_tcb *Next_thread;
-	queue_dequeue(Ready_Queue, (void**)&Next_thread);
-	struct uthread_tcb *Curr_thread_ptr = current_thread;
+	struct uthread_tcb *next_thread;
+	queue_dequeue(Ready_Queue, (void**)&next_thread);
+	struct uthread_tcb *curr_thread_ptr = current_thread;
 	
 	//Context switch 
-	current_thread = Next_thread;
+	current_thread = next_thread;
 	current_thread->thread_state = RUNNING;
-	uthread_ctx_switch(Curr_thread_ptr->context_ptr, Next_thread->context_ptr);	
+	preempt_enable();
+	uthread_ctx_switch(curr_thread_ptr->context_ptr, next_thread->context_ptr);	
 }
 
 void uthread_exit(void)
 {
 	//Make current thread "EXITED"
+	preempt_disable();
 	current_thread->thread_state = EXITED;
 	uthread_ctx_destroy_stack(current_thread->stack_ptr);
-	struct uthread_tcb *Next_thread;
-	queue_dequeue(Ready_Queue, (void**)&Next_thread);
-	struct uthread_tcb *Current_thread_ptr = current_thread;
+	struct uthread_tcb *next_thread;
+	queue_dequeue(Ready_Queue, (void**)&next_thread);
+	struct uthread_tcb *current_thread_ptr = current_thread;
 	
 	//Context switch 
-	current_thread = Next_thread;
+	current_thread = next_thread;
 	current_thread->thread_state = 1;
-	uthread_ctx_switch(Current_thread_ptr->context_ptr, Next_thread->context_ptr);	
+	preempt_enable();
+	uthread_ctx_switch(current_thread_ptr->context_ptr, next_thread->context_ptr);	
 }
 
 int uthread_create(uthread_func_t func, void *arg)
 {
-	struct uthread_tcb *myThread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
+	struct uthread_tcb *new_thread = (struct uthread_tcb*)malloc(sizeof(struct uthread_tcb));
 
-	myThread->stack_ptr = uthread_ctx_alloc_stack();
-	myThread->context_ptr = (uthread_ctx_t *)malloc(sizeof(uthread_ctx_t)) ;
-	myThread -> thread_state = 0;
+	new_thread->stack_ptr = uthread_ctx_alloc_stack();
+	new_thread->context_ptr = (uthread_ctx_t *)malloc(sizeof(uthread_ctx_t)) ;
+	new_thread->thread_state = READY;
 	int retval = 0;
-	retval = uthread_ctx_init(myThread->context_ptr, myThread->stack_ptr, func, arg);
-	if (myThread->stack_ptr == NULL || retval == -1) return -1;
+	retval = uthread_ctx_init(new_thread->context_ptr, new_thread->stack_ptr, func, arg);
+	if (new_thread->stack_ptr == NULL || retval == -1) return -1;
 	
-	queue_enqueue(Ready_Queue, (void*)myThread);
-	// printf("Length of queue is %d \n", queue_length(Ready_Queue));
+	queue_enqueue(Ready_Queue, (void*)new_thread);
 	return 0;
 }
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	if (preempt == true) return 0; // need to change on phase 4
+	preempt_start(preempt); 
+	if (preempt) preempt_disable();
+
 	if (Ready_Queue == NULL) Ready_Queue = queue_create();
 	//clear the idle thread, and enqueue it into Ready_Queue
 	uthread_create(NULL, NULL);
 	queue_dequeue(Ready_Queue, (void**)&idle_thread);
 	current_thread = idle_thread;
-
 	uthread_create(func, arg); 
 
+	if (preempt) preempt_enable();
 	while (1){
 		uthread_yield();
+
 		if (queue_length(Ready_Queue) == 0) break;
+
 	}
-	printf("end of thread run\n");
+	//ghjfgfhk
+	if (preempt) { 
+		preempt_disable();
+		preempt_stop();
+	}
+	
 	queue_destroy(Ready_Queue);
 	return 0;
 	//free the queue
@@ -116,6 +128,7 @@ void uthread_block(void)
 	current_thread->thread_state = BLOCKED;
 	queue_dequeue(Ready_Queue, (void**)&next_thread);
 	current_thread = next_thread;
+	preempt_enable();
 	uthread_ctx_switch(curr_thread_ptr->context_ptr, next_thread->context_ptr);
 }
 
@@ -127,3 +140,4 @@ void uthread_unblock(struct uthread_tcb *uthread)
 {
 	queue_enqueue(Ready_Queue, (void*)uthread);
 }
+
