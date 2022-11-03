@@ -30,7 +30,7 @@ another pointer call 'next' with type 'struct Node*' representing the ➡️.
 3. struct Node* newNode with its parameter 'value', allocating a space for each new node, 
 initializing its value and connecting its next node.
 
-Now, We would like to implement 7 basic queue operations: create(), enqueue(), dequeue(),
+Now, It is time to implement 7 basic queue operations: create(), enqueue(), dequeue(),
 delete(), iterate(), getLength() and destory().
 
 ✔️In create() function, we first allocate a space for our queue and seted its front node and 
@@ -66,6 +66,13 @@ with iterate() function.
 
 ✔️In destory() function, we just free the queue that we created in order to destory the queue. 
 ✔️In getLength() function, we just return the member 'length' of struct queue.
+
+Testing😼: to check whether our coding parts is correctly constructed, we created our own tester which 
+containing one array as our data pool. By calling create() function to create a queue and calling 
+enqueue & dequeue, we compared the result with our designed output. If they do not match with each 
+other, an assertion will occur and give a test failure o us. Also, to check iterator() function, we
+create our callback function containing delete() function, which could check our delete() function
+and iterator function at once. 
 
 Part 2️⃣ User-level thread library
 
