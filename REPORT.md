@@ -1,21 +1,19 @@
-# Project 2 Report: User-level Thread Library 🗣📚
+# Project 2 Report: User-level Thread Library ⛓📚 
 
 # Summary 🌟
-
-Once mention the operating system, those excellent tech products as well as fancy programming 
-languages come to our mind immediately. However, most people even us as computer science major 
-students often ignore how powerful the most fundamental but important tool, the shell, is.  
-Shell, is a user interfaceto the Operating System's services and it gets input from the user, 
-interprets the input as wellas launches the desired actions to the user. In this project, 
-we implemented a simple shell that can perform basic command lines and user communication via 
-the terminal to help us better understand how Unix system calls work.
+As we all know, thread is a single execution sequence in computer science that represents 
+a separately schedulable task. The appearance of thread greatly accomplishes our idea that 
+we want to place concurrent computations within the same address space and eliminate 
+duplication of the address space and most of the environment while running a program. 
 
 # Implementation 🌟
 
-The implementation of this program follows distinct steps:
+The implementation of this program is consist of three parts.
 
-1⃣️ Parsing the command line given by the users input into two pieces, command and arguments.
+Part 1️⃣: Queue API
 
+Part 2️⃣: User-level thread library
+Part 3️⃣: Semaphore API
 To better recognize the command and execute each arguments correctly, we created a 'Parser' function 
 via data structure called 'struct Parser' to seperate command and arguments. First, we create two 
 arrays, array 'command' for saving command and the other one 'args' for saving arguments. We use 
