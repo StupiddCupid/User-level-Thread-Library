@@ -69,10 +69,8 @@ void preempt_start(bool preempt)
         new_timer.it_value.tv_sec = 0;
         new_timer.it_value.tv_usec = 1000000 / HZ;
         new_timer.it_interval = new_timer.it_value;
-        if (setitimer(ITIMER_VIRTUAL, &new_timer, &old_timer) == -1) {
-            perror("fail to call setitimer()\n");
-            exit(1);
-        }
+        setitimer(ITIMER_VIRTUAL, &new_timer, &old_timer);
+            
     }
 }
 
@@ -85,10 +83,7 @@ void preempt_start(bool preempt)
 void preempt_stop(void)
 {
     // restore timer
-    if (setitimer(ITIMER_VIRTUAL, &old_timer, NULL) == -1) {
-        perror("fail to call setitimer()\n");
-        exit(1);
-    }
+    setitimer(ITIMER_VIRTUAL, &old_timer, NULL);
 
     //resotre action
     sigemptyset(&old_action.sa_mask);
