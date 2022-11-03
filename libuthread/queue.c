@@ -98,7 +98,8 @@ int queue_delete(queue_t queue, void *data)
 {
 	if (queue == NULL || data == NULL) return -1;
 
-    struct Node *prev_node = queue->front, *curr_node = queue->front;
+    struct Node *prev_node = queue->front;
+    struct Node *curr_node = queue->front;
     int dataFound = 0;
 
     while(curr_node != NULL) {
@@ -117,8 +118,9 @@ int queue_delete(queue_t queue, void *data)
             free(curr_node);
             queue->length -= 1;
             break;
-        }
+        } 
         else {
+            //if data is not found, go to the next avilable node
             if (curr_node->next == NULL) break;
             else {
                 prev_node = curr_node;
@@ -138,7 +140,8 @@ int queue_iterate(queue_t queue, queue_func_t func)
 
     struct Node *curr_node = queue->front;
     struct Node *next_node = queue->front->next;
-    
+
+    //loop through the queue
     while(curr_node != NULL) {
         func(queue, curr_node->key);
         if (next_node != NULL) {
