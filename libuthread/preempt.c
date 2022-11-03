@@ -57,21 +57,21 @@ void alarm_handler(__attribute__((unused)) int signum)
  */
 void preempt_start(bool preempt)
 {
-	struct sigaction new_action, old_action;
-
-    /* Set up handler for alarm */
-    new_action.sa_handler = alarm_handler;
-    new_action.sa_flags = 0;
-    sigemptyset(&new_action.sa_mask);
-    sigaction(SIGVTALRM, &new_action, &old_action);
+    if (preempt) {
+        /* Set up handler for alarm */
+        new_action.sa_handler = alarm_handler;
+        new_action.sa_flags = 0;
+        sigemptyset(&new_action.sa_mask);
+        sigaction(SIGVTALRM, &new_action, &old_action);
     
-    /* set up alarm */
-    new_timer.it_value.tv_sec = 0;
-    new_timer.it_value.tv_usec = 1000000 / HZ;
-    new_timer.it_interval = new_timer.it_value;
-    if (setitimer(ITIMER_VIRTUAL, &new_timer, NULL) == -1) {
-        perror("fail to call setitimer()\n");
-        exit(1);
+        /* set up alarm */
+        new_timer.it_value.tv_sec = 0;
+        new_timer.it_value.tv_usec = 1000000 / HZ;
+        new_timer.it_interval = new_timer.it_value;
+        if (setitimer(ITIMER_VIRTUAL, &new_timer, NULL) == -1) {
+            perror("fail to call setitimer()\n");
+            exit(1);
+        }
     }
 }
 
