@@ -1,9 +1,7 @@
 /*
- * Thread creation and yielding test
+ * preempt
  *
- * Tests the creation of multiples threads and the fact that a parent thread
- * should get returned to before its child is executed. The way the printing,
- * thread creation and yielding is done, the program should output:
+ * Tests if current thread is changed every 1000000/100 seconds
  *
  * thread1
  * thread2
@@ -20,7 +18,7 @@ void thread3(void *arg)
 {
 	(void)arg;
 
-	uthread_yield();
+	
 	printf("thread3\n");
 }
 
@@ -29,7 +27,7 @@ void thread2(void *arg)
 	(void)arg;
 
 	uthread_create(thread3, NULL);
-	uthread_yield();
+	
 	printf("thread2\n");
 }
 
@@ -38,9 +36,9 @@ void thread1(void *arg)
 	(void)arg;
 
 	uthread_create(thread2, NULL);
-	uthread_yield();
+	
 	printf("thread1\n");
-	uthread_yield();
+	
 }
 
 int main(void)
