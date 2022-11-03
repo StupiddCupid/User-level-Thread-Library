@@ -13,7 +13,7 @@ high-quality C code.
 
 The implementation of this program is consist of three parts.
 
-Part 1️⃣: Queue API
+Part 1️⃣ Queue API
 
 To better manipulate our simple FIFO queue and make each operation effectively, we utilized 
 linked list -a underlying data structure- for our queue implementation. By taking the advantage 
@@ -29,11 +29,15 @@ and another pointer call 'next' with type 'struct Node*' representing the ➡️
 3. struct Node* newNode with its parameter 'value', allocating a space for each new node, 
 initializing its value and connecting its next node.
 
+For 
 
 
 
-Part 2️⃣: User-level thread library
-Part 3️⃣: Semaphore API
+
+Part 2️⃣ User-level thread library
+
+
+Part 3️⃣ Semaphore API
 To better recognize the command and execute each arguments correctly, we created a 'Parser' function 
 via data structure called 'struct Parser' to seperate command and arguments. First, we create two 
 arrays, array 'command' for saving command and the other one 'args' for saving arguments. We use 
