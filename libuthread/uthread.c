@@ -60,8 +60,8 @@ void uthread_yield(void)
 
 void uthread_exit(void)
 {
-	//Make current thread "EXITED"
 	preempt_disable();
+	//Make current thread "EXITED"
 	current_thread->thread_state = EXITED;
 	uthread_ctx_destroy_stack(current_thread->stack_ptr);
 	struct uthread_tcb *next_thread;
@@ -92,9 +92,6 @@ int uthread_create(uthread_func_t func, void *arg)
 
 int uthread_run(bool preempt, uthread_func_t func, void *arg)
 {
-	preempt_start(preempt); 
-	if (preempt) preempt_disable();
-
 	if (Ready_Queue == NULL) Ready_Queue = queue_create();
 	//clear the idle thread, and enqueue it into Ready_Queue
 	uthread_create(NULL, NULL);
@@ -102,20 +99,17 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 	current_thread = idle_thread;
 	uthread_create(func, arg); 
 
-	if (preempt) preempt_enable();
+	preempt_start(preempt);
+
 	while (1){
 		uthread_yield();
-
 		if (queue_length(Ready_Queue) == 0) break;
+	}
 
-	}
-	//ghjfgfhk
-	if (preempt) { 
-		preempt_disable();
-		preempt_stop();
-	}
-	
+	preempt_stop();
+
 	queue_destroy(Ready_Queue);
+	Ready_Queue = NULL;
 	return 0;
 	//free the queue
 }
