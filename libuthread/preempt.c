@@ -25,7 +25,9 @@ sigset_t block_alarm;
  */
 void preempt_disable(void)
 {
-	/* TODO Phase 4 */
+	sigemptyset(&block_alarm);
+    sigaddset(&block_alarm, SIGVTALRM);
+    sigprocmask(SIG_BLOCK, &block_alarm, NULL);
 }
 
 /*
@@ -33,10 +35,12 @@ void preempt_disable(void)
  */
 void preempt_enable(void)
 {
-	/* TODO Phase 4 */
+	sigemptyset(&block_alarm);
+    sigaddset(&block_alarm, SIGVTALRM);
+    sigprocmask(SIG_UNBLOCK, &block_alarm, NULL);
 }
 
-void alarm_handler(_attribute_((unused))int signum)
+void alarm_handler(__attribute__((unused)) int signum)
 {
     uthread_yield();
 }
@@ -57,17 +61,16 @@ void preempt_start(bool preempt)
 
     /* Set up handler for alarm */
     new_action.sa_handler = alarm_handler;
-    sigemptyset(&new_action.sa_mask);
     new_action.sa_flags = 0;
+    sigemptyset(&new_action.sa_mask);
     sigaction(SIGVTALRM, &new_action, &old_action);
-
+    
     /* set up alarm */
-    struct itimerval it_val;
-    it_val.it_value.tv_sec = 0;
-    it_val.it_value.tv_usec = 1000000 / HZ;
-    it_val.it_interval = it_val.it_value;
-    if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
-        perror("error calling setitimer()");
+    new_timer.it_value.tv_sec = 0;
+    new_timer.it_value.tv_usec = 1000000 / HZ;
+    new_timer.it_interval = new_timer.it_value;
+    if (setitimer(ITIMER_VIRTUAL, &new_timer, NULL) == -1) {
+        perror("fail to call setitimer()\n");
         exit(1);
     }
 }
@@ -80,7 +83,15 @@ void preempt_start(bool preempt)
  */
 void preempt_stop(void)
 {
-	/* TODO Phase 4 */
+    // restore timer
+    if (setitimer(ITIMER_VIRTUAL, &old_timer, NULL) == -1) {
+        perror("fail to call setitimer()\n");
+        exit(1);
+    }
+
+    //resotre action
+	sigemptyset(&old_action.sa_mask);
+    sigaction(SIGVTALRM, &old_action, NULL);
 }
 
 
