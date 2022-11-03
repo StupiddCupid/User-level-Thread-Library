@@ -4,15 +4,33 @@
 As we all know, thread is a single execution sequence in computer science that represents 
 a separately schedulable task. The appearance of thread greatly accomplishes our idea that 
 we want to place concurrent computations within the same address space and eliminate 
-duplication of the address space and most of the environment while running a program. In 
-this project, we implement a user-level thread library that can perform basic insturctions 
-for running multiple threads within the same process via high-quality C code.
+duplication of the address space and most of the environment while running a program. Thus,
+in this project, we implement a user-level thread library for linux that can rovide a 
+complete interface for applications to create and run independent threads concurrently via 
+high-quality C code.
 
 # Implementation 🌟
 
 The implementation of this program is consist of three parts.
 
 Part 1️⃣: Queue API
+
+To better manipulate our simple FIFO queue and make each operation effectively, we utilized 
+linked list -a underlying data structure- for our queue implementation. By taking the advantage 
+of 'struct' data type，we create three struct functions with their members to construct the
+basic structure of our queue:
+
+1. struct queue, containing the length of the queue and two pointers of type 'struct Node', 
+one pointing to the front node and the other one pointing to the tail node.
+
+2. struct Node, containing one pointer called 'key' for storing the value of the node
+and another pointer call 'next' with type 'struct Node*' representing the ➡️.
+
+3. struct Node* newNode with its parameter 'value', allocating a space for each new node, 
+initializing its value and connecting its next node.
+
+
+
 
 Part 2️⃣: User-level thread library
 Part 3️⃣: Semaphore API
