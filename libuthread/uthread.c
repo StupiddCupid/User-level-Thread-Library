@@ -85,8 +85,9 @@ int uthread_create(uthread_func_t func, void *arg)
 	int retval = 0;
 	retval = uthread_ctx_init(new_thread->context_ptr, new_thread->stack_ptr, func, arg);
 	if (new_thread->stack_ptr == NULL || retval == -1) return -1;
-	
+	preempt_enable();
 	queue_enqueue(Ready_Queue, (void*)new_thread);
+	preempt_disable();
 	return 0;
 }
 
