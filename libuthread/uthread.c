@@ -29,6 +29,17 @@ struct uthread_tcb {
 	state thread_state;
 };
 
+void clear_exited_queue()
+{
+	struct uthread_tcb *thread_to_free;
+	while(queue_length(Exited_Queue) > 0) {
+		queue_dequeue(Exited_Queue, (void**)&thread_to_free);
+		uthread_ctx_destroy_stack(thread_to_free->context_ptr);
+		free(thread_to_free);
+	}
+	Exited_Queue = NULL;
+}
+
 struct uthread_tcb *uthread_current(void)
 {
 	return current_thread;
@@ -63,7 +74,6 @@ void uthread_exit(void)
 	preempt_disable();
 	//Make current thread "EXITED"
 	current_thread->thread_state = EXITED;
-	uthread_ctx_destroy_stack(current_thread->stack_ptr);
 	queue_enqueue(Exited_Queue, (void*)current_thread);
 	struct uthread_tcb *next_thread;
 	queue_dequeue(Ready_Queue, (void**)&next_thread);
@@ -110,10 +120,9 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 	preempt_stop();
 
 	//free the queue
+	clear_exited_queue();
 	queue_destroy(Ready_Queue);
-	queue_destroy(Exited_Queue);
 	Ready_Queue = NULL;
-	Exited_Queue = NULL;
 	return 0;
 }
 
