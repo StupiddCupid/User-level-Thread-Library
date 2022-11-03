@@ -11,8 +11,8 @@
 #include "uthread.h"
 #include "queue.h"
 
-//global ptr pointing to the front of the queue
-struct queue *Ready_Queue;
+static struct queue *Ready_Queue;
+static struct queue *Exited_Queue;
 static struct uthread_tcb *current_thread;
 static struct uthread_tcb *idle_thread;
 
@@ -42,7 +42,7 @@ void uthread_yield(void)
 		queue_dequeue(Ready_Queue, (void**)&IDLE_thread);
 		return;
 	}
-	current_thread->thread_state = 0;
+	current_thread->thread_state = READY;
 	queue_enqueue(Ready_Queue, (void*)current_thread);
 
 	//Get the head of the queue
@@ -52,14 +52,14 @@ void uthread_yield(void)
 	
 	//Context switch 
 	current_thread = Next_thread;
-	current_thread->thread_state = 1;
+	current_thread->thread_state = RUNNING;
 	uthread_ctx_switch(Curr_thread_ptr->context_ptr, Next_thread->context_ptr);	
 }
 
 void uthread_exit(void)
 {
 	//Make current thread "EXITED"
-	current_thread->thread_state = 3;
+	current_thread->thread_state = EXITED;
 	uthread_ctx_destroy_stack(current_thread->stack_ptr);
 	struct uthread_tcb *Next_thread;
 	queue_dequeue(Ready_Queue, (void**)&Next_thread);
