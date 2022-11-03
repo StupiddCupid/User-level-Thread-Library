@@ -25,7 +25,7 @@ sigset_t block_alarm;
  */
 void preempt_disable(void)
 {
-	sigemptyset(&block_alarm);
+    sigemptyset(&block_alarm);
     sigaddset(&block_alarm, SIGVTALRM);
     sigprocmask(SIG_BLOCK, &block_alarm, NULL);
 }
@@ -35,7 +35,7 @@ void preempt_disable(void)
  */
 void preempt_enable(void)
 {
-	sigemptyset(&block_alarm);
+    sigemptyset(&block_alarm);
     sigaddset(&block_alarm, SIGVTALRM);
     sigprocmask(SIG_UNBLOCK, &block_alarm, NULL);
 }
@@ -90,10 +90,6 @@ void preempt_stop(void)
     }
 
     //resotre action
-	sigemptyset(&old_action.sa_mask);
+    sigemptyset(&old_action.sa_mask);
     sigaction(SIGVTALRM, &old_action, NULL);
 }
-
-
-
-
