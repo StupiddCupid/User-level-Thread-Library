@@ -19,27 +19,25 @@ struct Node
 
 struct Node* newNode(void* value)
 {
-    struct Node* newnode = (struct Node*) malloc (sizeof(struct Node));
-    newnode->key = value;
-    newnode->next = NULL;
-    return newnode;
+    struct Node* new_node = (struct Node*) malloc (sizeof(struct Node));
+    new_node->key = value;
+    new_node->next = NULL;
+    return new_node;
 };
 
 queue_t queue_create(void)
 {
-    struct queue* myQueue = (struct queue*) malloc(sizeof(struct queue));
-    if (myQueue == NULL){
-        return NULL;
-    }
-    myQueue->length = 0;
-    return myQueue;
+    struct queue* new_queue = (struct queue*) malloc(sizeof(struct queue));
+    if (new_queue == NULL) { return NULL; }
+    new_queue->front = NULL;
+    new_queue->tail = NULL;
+    new_queue->length = 0;
+    return new_queue;
 }
 
 int queue_destroy(queue_t queue)
 {
-	if (queue == NULL || queue->length > 0){
-        return -1;
-    }
+	if (queue == NULL || queue->length > 0) { return -1; }
     free(queue);
     return 0;
 }
@@ -57,18 +55,11 @@ int queue_destroy(queue_t queue)
 int queue_enqueue(queue_t queue, void *data)
 {
     //if queue is null or data is null
-
-    if (queue == NULL || data == NULL){
-        return -1;
-    }
+    if (queue == NULL || data == NULL) { return -1; }
 
     //create a new node, return -1 if fails to create new node
     struct Node* new_node = newNode(data);
-
-    if (new_node == NULL){
-        return -1;
-    }
-    // printf("The key in queue is %d\n", *(int *)data);
+    if (new_node == NULL){ return -1; }
 
     //add new node if queue is empty
     if (queue->length == 0){
@@ -91,7 +82,6 @@ int queue_enqueue(queue_t queue, void *data)
     queue->tail = new_node;
     queue->length += 1;
     return 0;
-
 }
 
 /*
@@ -109,22 +99,19 @@ int queue_dequeue(queue_t queue, void **data)
 {
     if(queue == NULL || data == NULL || queue->length == 0) return -1;
 
+    struct Node *curr_node;
+    curr_node = queue->front;
+    *data = curr_node->key;
+
     //if only one node left in the queue
-    if(queue->length == 1) {
-        struct Node *curr_node = queue->front;
-        *data = curr_node->key;
-        free(curr_node);
+    if (queue->length == 1) {
         queue->front = NULL;
-        queue->length = 0;
-        return 0;
+        queue->tail = NULL;
+    } else {
+        queue->front = curr_node->next;
     }
-    
-    *data = queue->front->key;
-    struct Node *frontNode = queue->front;
-    queue->front = queue->front->next;
-    free(frontNode);
+    free(curr_node);
     queue->length -= 1;
-    
     return 0;
 }
 
@@ -170,7 +157,6 @@ int queue_delete(queue_t queue, void *data)
             }
         }
     }
-    curr_node->next = NULL;
     curr_node = NULL;
     prev_node = NULL;
     if (dataFound == 0) return -1;
@@ -211,3 +197,4 @@ int queue_length(queue_t queue)
     if (queue == NULL) return -1;
     else return queue->length;
 }
+
