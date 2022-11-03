@@ -45,7 +45,6 @@ int sem_destroy(sem_t sem)
 	queue_destroy(sem->blocked_queue);
 	free(sem);
 	return 0;
-	
 }
 
 /*
@@ -62,6 +61,7 @@ int sem_destroy(sem_t sem)
 int sem_down(sem_t sem)
 {
 	// how to break out while loop
+	preempt_disable();
 	while (sem->count == 0) {
 		struct uthread_tcb *curr_thread;
 		curr_thread = uthread_current();
@@ -87,12 +87,14 @@ int sem_down(sem_t sem)
 int sem_up(sem_t sem)
 {
 	if (sem == NULL) return -1;
+	preempt_disable();
 	sem->count += 1;
 	if (queue_length(sem->blocked_queue) != 0) {
 		struct uthread_tcb *uthread;
 		queue_dequeue(sem->blocked_queue, (void**)&uthread);
 		uthread_unblock(uthread);
 	}
+	preempt_enable();
 	return 0;
 }
 
