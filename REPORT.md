@@ -56,16 +56,19 @@ front and tail to be null indicating that no more node lefts. The other case is 
 node is in our queue, we simply reset our front node to be the next node. 
 
 ✔️In delete() function, we would like to find the first node that has the data we want to delete and 
-delete it. Thus, using a loop comes into our mind. By having a while loop, we can iterating the
-loop until we reach the node we want to delete. To finish delete, we also reset front and tail pointer
-in different cases like enqueue() function.
+delete it. Thus, using a loop comes into our mind. By having a while loop, we can iterating the loop 
+until we reach the node we want to delete. To finish delete, we also reset front and tail pointer in 
+different cases like enqueue() function.
 
-✔️In iterate() function, it should iterates through all items in the queue and calls the given callback 
+✔️In iterate() function, it should iterate through all items in the queue and calls the given callback 
+function on each item. So, using a while loop that contiune call the callback function is how we dealed
+with iterate() function.
 
-
-
+✔️In destory() function, we just free the queue that we created in order to destory the queue. 
+✔️In getLength() function, we just return the member 'length' of struct queue.
 
 Part 2️⃣ User-level thread library
+
 
 
 Part 3️⃣ Semaphore API
