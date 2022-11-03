@@ -4,7 +4,9 @@
 As we all know, thread is a single execution sequence in computer science that represents 
 a separately schedulable task. The appearance of thread greatly accomplishes our idea that 
 we want to place concurrent computations within the same address space and eliminate 
-duplication of the address space and most of the environment while running a program. 
+duplication of the address space and most of the environment while running a program. In 
+this project, we implement a user-level thread library that can perform basic insturctions 
+for running multiple threads within the same process via high-quality C code.
 
 # Implementation 🌟
 
