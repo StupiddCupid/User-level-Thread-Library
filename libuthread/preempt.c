@@ -36,6 +36,11 @@ void preempt_enable(void)
 	/* TODO Phase 4 */
 }
 
+void alarm_handler(_attribute_((unused))int signum)
+{
+    uthread_yield();
+}
+
 /*
  * preempt_start - Start thread preemption
  * @preempt: Enable preemption if true
@@ -46,22 +51,17 @@ void preempt_enable(void)
  * If @preempt is false, don't start preemption; all the other functions from
  * the preemption API should then be ineffective.
  */
-void alarm_handler(int signum)
-{
-    uthread_yield();
-}
-
 void preempt_start(bool preempt)
 {
 	struct sigaction new_action, old_action;
 
     /* Set up handler for alarm */
-    new_action.new_action_handler = alarm_handler;
-    sigemptyset(&new_action.new_action_mask);
-    new_action.new_action_flags = 0;
+    new_action.sa_handler = alarm_handler;
+    sigemptyset(&new_action.sa_mask);
+    new_action.sa_flags = 0;
     sigaction(SIGVTALRM, &new_action, &old_action);
 
-    /* Configure alarm */
+    /* set up alarm */
     struct itimerval it_val;
     it_val.it_value.tv_sec = 0;
     it_val.it_value.tv_usec = 1000000 / HZ;
