@@ -68,6 +68,7 @@ int sem_down(sem_t sem)
 		queue_enqueue(sem->blocked_queue, (void*)curr_thread);
 		uthread_block();
 	}
+	preempt_enable();
 	sem->count -= 1;
 	return 0;
 }

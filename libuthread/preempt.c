@@ -40,8 +40,9 @@ void preempt_enable(void)
     sigprocmask(SIG_UNBLOCK, &block_alarm, NULL);
 }
 
-void alarm_handler(__attribute__((unused)) int signum)
+void alarm_handler(int signum)
 {
+    (void)signum;
     uthread_yield();
 }
 

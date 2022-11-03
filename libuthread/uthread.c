@@ -54,8 +54,8 @@ void uthread_yield(void)
 	//Context switch 
 	current_thread = next_thread;
 	current_thread->thread_state = RUNNING;
-	preempt_enable();
-	uthread_ctx_switch(curr_thread_ptr->context_ptr, next_thread->context_ptr);	
+	uthread_ctx_switch(curr_thread_ptr->context_ptr, next_thread->context_ptr);
+	preempt_enable();	
 }
 
 void uthread_exit(void)
@@ -71,8 +71,8 @@ void uthread_exit(void)
 	//Context switch 
 	current_thread = next_thread;
 	current_thread->thread_state = 1;
-	preempt_enable();
 	uthread_ctx_switch(current_thread_ptr->context_ptr, next_thread->context_ptr);	
+	preempt_enable();
 }
 
 int uthread_create(uthread_func_t func, void *arg)
@@ -85,9 +85,9 @@ int uthread_create(uthread_func_t func, void *arg)
 	int retval = 0;
 	retval = uthread_ctx_init(new_thread->context_ptr, new_thread->stack_ptr, func, arg);
 	if (new_thread->stack_ptr == NULL || retval == -1) return -1;
-	preempt_enable();
-	queue_enqueue(Ready_Queue, (void*)new_thread);
 	preempt_disable();
+	queue_enqueue(Ready_Queue, (void*)new_thread);
+	preempt_enable();
 	return 0;
 }
 
@@ -111,6 +111,7 @@ int uthread_run(bool preempt, uthread_func_t func, void *arg)
 
 	queue_destroy(Ready_Queue);
 	Ready_Queue = NULL;
+
 	return 0;
 	//free the queue
 }
