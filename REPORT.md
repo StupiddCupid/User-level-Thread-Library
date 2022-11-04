@@ -11,26 +11,20 @@ applications to create and run independent threads concurrently via high-quality
 C code.
 
 # Implementation 🌟
-
 **Part 1️⃣ Queue API**
-
 To implement thread , we chose one of the most used containers, queue, by a given 
 API. To better manipulate our simple FIFO queue and make each operation effectively, 
 we utilized **linked list** for our queue implementation. By taking the advantage of 
 data type 'struct'，we create three struct functions with their members to construct 
 the basic structure of our queue:
-
 1. struct queue, containing the length of the queue and two pointers of type'struct Node', 
 one pointing to the front node and the other one pointing to the tail node.
-
 2. struct Node, containing one pointer called 'key' storing the value of the node and 
 another pointer call 'next' with type 'struct Node*' representing the ➡️.
-
 3. struct Node* newNode with its parameter 'value', allocating a space for each new node, 
 initializing its value and connecting its next node.
 
-We implement 7 basic queue operations: create(), enqueue(), dequeue(), delete(), iterate(), 
-getLength() and destory().
+We implement 7 basic queue operations: 
 
 ✔️Create() function, we first allocate a space for our queue and set its front node and 
 tail node to be null. Also, the default length of the queue is initialized to be zero. 
@@ -80,7 +74,6 @@ iterator() function, we create our callback function containing delete() functio
 could check our delete() function and iterator function at once. 
 
 **Part 2️⃣ User-level thread library** 
-
 Here, we want to implement most of thread management which are create, run,
 yield, exit, and block/unblock. By taking the advantage of queue that we
 constructed in part1, we create a queue called Ready_Queue that store the thread
@@ -131,7 +124,6 @@ the uthread_hello.c and uthread_yile.c. Fortunately, it gave us exactly order of
 output that we expected to get. 
 
 **Part 3️⃣ Semaphore API** 
-
 Semaphores take control of the access to shared resources by threads. A
 semaphore contains an internal count representing the number of available
 resources and a queue that uses a waiting list for threads to wait for available
