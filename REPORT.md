@@ -39,11 +39,9 @@ should be three cases when adding a new node to our queue.
    case1:   Our queue is empty, which means the length of it is currently zero.
             Thus, we simply set front and tail both points to the new node, and
             increase the length by 1.
-
    case2:   Our queue has length of 1, which means our front node and tail node
             are currently the same. Then, we let tail points to new node and
             connect front nodeto the new node. Increseing the length by 1.
-
    case3:   Our queue has a size bigger than 1, which is the most common case.
             We keep front the same and set the tail pointer points to new node.
             Finally, making the new node to be the tail node.
