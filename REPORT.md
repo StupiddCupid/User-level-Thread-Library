@@ -17,18 +17,14 @@ given API. To better manipulate our simple FIFO queue and make each operation
 effectively, we utilized **linked list** for our queue implementation. By taking
 the advantage of data type 'struct'，we create three struct functions with their
 members to construct the basic structure of our queue:
-
 1. struct queue, contains the length of the queue and two pointers of
    type'struct Node', one points to the front and the other points to the tail.
-
 2. struct Node, contains one pointer called 'key' storing the value and another
    pointer call 'next' with type 'struct Node*' points to node after.
-
 3. struct Node* newNode with its parameter 'value', allocating a space for each
    new node, initializing its value and connecting its next node.
 
-We implement 7 basic queue operations: 
-
+We implemented 7 basic queue operations: 
 ✔️Create() function, we first allocate a space for our queue and set its front
 node and tail node to be null. Also, the default length of the queue is
 initialized to be zero. 
