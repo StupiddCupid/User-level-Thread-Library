@@ -1,6 +1,7 @@
 # Project 2 Report: User-level Thread Library ⛓📚 
 
 # Summary 🌟
+
 As we all know, thread is a single execution sequence in computer science that
 represents a separately schedulable task. The appearance of thread greatly
 accomplishes our idea that we want to place concurrent computations within the
@@ -12,26 +13,29 @@ C code.
 
 # Implementation 🌟
 **Part 1️⃣ Queue API**
-To implement thread , we chose one of the most used containers, queue, by a given 
-API. To better manipulate our simple FIFO queue and make each operation effectively, 
-we utilized **linked list** for our queue implementation. By taking the advantage of 
-data type 'struct'，we create three struct functions with their members to construct 
-the basic structure of our queue:
-1. struct queue, containing the length of the queue and two pointers of type'struct Node', 
-one pointing to the front node and the other one pointing to the tail node.
-2. struct Node, containing one pointer called 'key' storing the value of the node and 
-another pointer call 'next' with type 'struct Node*' representing the ➡️.
-3. struct Node* newNode with its parameter 'value', allocating a space for each new node, 
-initializing its value and connecting its next node.
+To implement thread , we chose one of the most used containers, queue, by a
+given API. To better manipulate our simple FIFO queue and make each operation
+effectively, we utilized **linked list** for our queue implementation. By taking
+the advantage of data type 'struct'，we create three struct functions with their
+members to construct the basic structure of our queue:
+1. struct queue, containing the length of the queue and two pointers of
+type'struct Node', one pointing to the front node and the other one pointing to
+the tail node.
+2. struct Node, containing one pointer called 'key' storing the value of the
+node and another pointer call 'next' with type 'struct Node*' representing the
+➡️.
+3. struct Node* newNode with its parameter 'value', allocating a space for each
+new node, initializing its value and connecting its next node.
 
 We implement 7 basic queue operations: 
 
-✔️Create() function, we first allocate a space for our queue and set its front node and 
-tail node to be null. Also, the default length of the queue is initialized to be zero. 
+✔️Create() function, we first allocate a space for our queue and set its front
+node and tail node to be null. Also, the default length of the queue is
+initialized to be zero. 
 
-✔️Enqueue() function, we create a new node with the passed value by using 'struct Node*' 
-that we created in the initialization. Then, we noticed there should be three cases when 
-adding a new node to our queue. 
+✔️Enqueue() function, we create a new node with the passed value by using
+'struct Node*' that we created in the initialization. Then, we noticed there
+should be three cases when adding a new node to our queue.
    case1:   Our queue is empty, which means the length of it is currently zero.
             Thus, we simply set front ptr and tail prt pointing to the new node,
             and increase the length.
@@ -44,23 +48,24 @@ adding a new node to our queue.
             tail pointer pointining to the new node. Finally, making the new
             node to be the tail node.
       
-✔️Dequeue() function, we have two cases. Before dealing with the different cases, we noticed 
-that we should first store the node that will be dequeued later. Thus, we create a new pointer 
-called 'current node' taking the job of storing dequeued node. One case is that If there is 
-only one node left in our queue, we simply set the front and tail to be null indicating that 
-no more node lefts. The other case is when more than one node left in our queue, we simply 
+✔️Dequeue() function, we have two cases. Before dealing with the different
+cases, we noticed that we should first store the node that will be dequeued
+later. Thus, we create a new pointer called 'current node' taking the job of
+storing dequeued node. One case is that If there is only one node left in our
+queue, we simply set the front and tail to be null indicating that no more node
+lefts. The other case is when more than one node left in our queue, we simply
 reset our front node to be the next node. 
 
-✔️Delete() function,by having a while loop, we can iterating the loop until we reach the node 
-we want to delete. To finish delete, we also reset front and tail pointer in different cases 
-like enqueue() function.
+✔️Delete() function, in a while loop, we iterate the queue until we reach the
+node we want to delete. To finish delete, we also reset front and tail pointer
+in different cases like enqueue() function.
 
-✔️Iterate() function, by using a while loop, we can contiunes call the callback function on 
-each item. 
+✔️Iterate() function, by using a while loop, we can contiunes call the callback
+function on each item. 
 
-✔️Destory() function, we just free the queue that we created in order to destory the queue. 
+✔️Destory() function, we free the queue that we created.
 
-✔️getLength() function, we just return the member 'length' of struct queue.
+✔️getLength() function, we return the member 'length' of struct queue.
 
 **Testing😼**
 To check whether our coding parts is correctly constructed, we created our own tester which 
