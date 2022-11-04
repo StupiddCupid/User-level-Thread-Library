@@ -64,7 +64,7 @@ dealed with iterate() function.
 ✔️Destory() function, we just free the queue that we created in order to destory the queue. 
 ✔️getLength() function, we just return the member 'length' of struct queue.
 
-Testing😼: to check whether our coding parts is correctly constructed, we created our own tester which 
+**Testing😼**: To check whether our coding parts is correctly constructed, we created our own tester which 
 containing one array as our data pool. By calling create() function to create a queue and calling 
 enqueue & dequeue, we compared the result with our designed output. If they do not match with each 
 other, an assertion will occur and give a test failure o us. Also, to check iterator() function, we
@@ -103,7 +103,9 @@ thread exit and running the next available thread.
 
 ✔️uthread_unblock(), in this function, we enqueue the thread that be passed into our **Ready_Queue**. 
 
-
+**Testing😼**
+To check wheter our thread implementation can be successfully performed, we ran the uthread_hello.c and uthread_yile.c.
+Fortunately, it gave us exactly order of output that we expected to get. 
 
 **Part 3️⃣ Semaphore API**
 
