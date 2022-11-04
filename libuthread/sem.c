@@ -47,18 +47,6 @@ int sem_down(sem_t sem)
 	return 0;
 }
 
-/*
- * sem_up - Release a semaphore
- * @sem: Semaphore to release
- *
- * Release a resource to semaphore @sem.
- *
- * If the waiting list associated to @sem is not empty, releasing a resource
- * also causes the first thread (i.e. the oldest) in the waiting list to be
- * unblocked.
- *
- * Return: -1 if @sem is NULL. 0 if semaphore was successfully released.
- */
 int sem_up(sem_t sem)
 {
 	if (sem == NULL) return -1;
@@ -73,4 +61,3 @@ int sem_up(sem_t sem)
 	preempt_enable();
 	return 0;
 }
-
