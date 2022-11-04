@@ -20,19 +20,14 @@ struct sigaction new_action, old_action;
 struct itimerval new_timer, old_timer;
 sigset_t block_alarm;
 
-/*
- * preempt_dinew_actionble - Dinew_actionble preemption
- */
 void preempt_disable(void)
 {
+    // use block alarm to mask the alarm signal
     sigemptyset(&block_alarm);
     sigaddset(&block_alarm, SIGVTALRM);
     sigprocmask(SIG_BLOCK, &block_alarm, NULL);
 }
 
-/*
- * preempt_enable - Enable preemption
- */
 void preempt_enable(void)
 {
     sigemptyset(&block_alarm);
@@ -46,18 +41,10 @@ void alarm_handler(int signum)
     uthread_yield();
 }
 
-/*
- * preempt_start - Start thread preemption
- * @preempt: Enable preemption if true
- *
- * Configure a timer that must fire a virtual alarm at a frequency of 100 Hz and
- * setup a timer handler that forcefully yields the currently running thread.
- *
- * If @preempt is false, don't start preemption; all the other functions from
- * the preemption API should then be ineffective.
- */
 void preempt_start(bool preempt)
 {
+    // if preempt is true, initializes timer and signal handler
+    // also stores old signal action and old timer configuration
     if (preempt) {
         /* Set up handler for alarm */
         new_action.sa_handler = alarm_handler;
@@ -69,23 +56,16 @@ void preempt_start(bool preempt)
         new_timer.it_value.tv_sec = 0;
         new_timer.it_value.tv_usec = 1000000 / HZ;
         new_timer.it_interval = new_timer.it_value;
-        setitimer(ITIMER_VIRTUAL, &new_timer, &old_timer);
-            
+        setitimer(ITIMER_VIRTUAL, &new_timer, &old_timer);   
     }
 }
 
-/*
- * preempt_stop - Stop thread preemption
- *
- * Restore previous timer configuration, and previous action associated to
- * virtual alarm signals.
- */
 void preempt_stop(void)
 {
     // restore timer
     setitimer(ITIMER_VIRTUAL, &old_timer, NULL);
 
-    //resotre action
+    // resotre action
     sigemptyset(&old_action.sa_mask);
     sigaction(SIGVTALRM, &old_action, NULL);
 }
