@@ -12,8 +12,6 @@ C code.
 
 # Implementation 🌟
 
-The implementation of this program is consist of three parts.
-
 **Part 1️⃣ Queue API**
 
 To implement thread , we chose one of the most used containers, queue, by a given 
@@ -175,6 +173,32 @@ programs and were able to product the correct output. Our implementation will be
 able to prevent the first difficulty of the corner case. If a thread is trying
 to take an unavailable resource, our program will block the thread and yeild to
 the next available thread.
+
+**Part 4 Preempt API** 
+In this part of the project, we implemented a preemption API, which is used to
+yield a thread periodically. To accomplish such a function, we install a signal
+handler and configure a timer that will fire an alarm a hundred times per
+second. We implemented four functions for this API.
+
+preempt_start(). This function receives a boolean parameter, if it is true, we
+set up preemption. We first set up a timer handler that will call
+**uthread_yield()** when receiving a SIGVTALRM signal using function
+**sigaction()**, and store to **old_action** that we will use to restore action
+after preemption is done.  Then we configure a timer that will fire an alarm
+through a SIGVTALRM signal and store previous time configuration to
+**old_timer** which is also used to restore time configuration after preemption
+is done. 
+
+In preempt_enable() and preempt_disable(), we will make the timer start
+receiving and ignoring signal when sensitive data is accessed.
+
+In preemp_stop(), we simply restore timer configuration and signal handler with
+the help of variables **old_timer** and **old_action**,
+
+**Testing😼** 
+For testing, we write a test program with 3 threads, each thread has an infinite
+loop. Inside the infinite loop, a statement will be printed after a short period
+(slightly less than the period we set).
 
 # Limitations🌟
    
