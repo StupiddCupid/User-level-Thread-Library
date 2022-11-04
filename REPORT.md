@@ -188,9 +188,5 @@ For testing, we write a test program with 3 threads, each thread has an infinite
 loop. Inside the infinite loop, a statement will be printed after a short period
 (slightly less than the period we set).
 
-# Limitations🌟
-   
 # The End🌟
 Thanks for watching:D
-
-                                 
