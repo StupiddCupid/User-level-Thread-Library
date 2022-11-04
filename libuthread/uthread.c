@@ -108,7 +108,7 @@ int uthread_create(uthread_func_t func, void *arg)
 
 	// check if context initialized
 	int retval = 0;
-	retval = uthread_ctx_init(new_thread->context_ptr, 
+	retval = uthread_ctx_init(new_thread->context_ptr,
 							  new_thread->stack_ptr, func, arg);
 	if (new_thread->stack_ptr == NULL || retval == -1) return -1;
 
@@ -148,10 +148,11 @@ void uthread_block(void)
 	struct uthread_tcb *curr_thread_ptr = current_thread;
 
 	preempt_disable();
+	// set thread state and go to next available thread
 	current_thread->thread_state = BLOCKED;
 	queue_dequeue(Ready_Queue, (void**)&next_thread);
 	current_thread = next_thread;
-	uthread_ctx_switch(curr_thread_ptr->context_ptr, 
+	uthread_ctx_switch(curr_thread_ptr->context_ptr,
 					   next_thread->context_ptr);
 	preempt_enable();
 }
@@ -160,7 +161,7 @@ void uthread_unblock(struct uthread_tcb *uthread)
 {
 	uthread->thread_state = READY;
 	preempt_disable();
+	// put thread into ready queue
 	queue_enqueue(Ready_Queue, (void*)uthread);
 	preempt_enable();
 }
-
