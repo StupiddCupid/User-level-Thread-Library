@@ -7,7 +7,7 @@
 
 struct queue 
 {
-	int length;
+    int length;
     struct Node *front, *tail;
 };
 
@@ -37,7 +37,7 @@ queue_t queue_create(void)
 
 int queue_destroy(queue_t queue)
 {
-	if (queue == NULL || queue->length > 0) { return -1; }
+    if (queue == NULL || queue->length > 0) { return -1; }
     free(queue);
     return 0;
 }
@@ -96,7 +96,7 @@ int queue_dequeue(queue_t queue, void **data)
 
 int queue_delete(queue_t queue, void *data)
 {
-	if (queue == NULL || data == NULL) return -1;
+    if (queue == NULL || data == NULL) return -1;
 
     struct Node *prev_node = queue->front;
     struct Node *curr_node = queue->front;
@@ -136,7 +136,7 @@ int queue_delete(queue_t queue, void *data)
 
 int queue_iterate(queue_t queue, queue_func_t func)
 {
-	if(queue== NULL || func == NULL) return -1;
+    if(queue== NULL || func == NULL) return -1;
 
     struct Node *curr_node = queue->front;
     struct Node *next_node = queue->front->next;
