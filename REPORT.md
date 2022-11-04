@@ -32,16 +32,13 @@ tail node to be null. Also, the default length of the queue is initialized to be
 ✔️Enqueue() function, we create a new node with the passed value by using 'struct Node*' 
 that we created in the initialization. Then, we noticed there should be three cases when 
 adding a new node to our queue. 
-
    case1:   Our queue is empty, which means the length of it is currently zero.
             Thus, we simply set front ptr and tail prt pointing to the new node,
             and increase the length.
-
    case2:   Our queue has length of 1, which means our front node and tail node
             are currently the same. Then, we move the tail node pointing to the
             new node and make the next node of the front node pointing to the
             new node. Increseing the length at the end.
-
    case3:   Our queue has a size bigger than 1, which is the most common case we
             need to handle. We keep the position of the front node and set the
             tail pointer pointining to the new node. Finally, making the new
