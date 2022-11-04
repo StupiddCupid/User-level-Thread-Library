@@ -14,6 +14,7 @@ C code.
 The implementation of this program is consist of three parts.
 
 **Part 1️⃣ Queue API**
+
 To implement thread and its performance, we chose one of the most used
 containers ,queue, by a given API. To better manipulate our simple FIFO queue
 and make each operation effectively, we utilized linked list -a underlying data
@@ -91,6 +92,7 @@ callback function containing delete() function, which could check our delete()
 function and iterator function at once. 
 
 **Part 2️⃣ User-level thread library** 
+
 Here, we want to implement most of thread management which are create, run,
 yield, exit, and block/unblock. By taking the advantage of queue that we
 constructed in part1, we create a queue called Ready_Queue that store the thread
@@ -141,6 +143,7 @@ the uthread_hello.c and uthread_yile.c. Fortunately, it gave us exactly order of
 output that we expected to get. 
 
 **Part 3️⃣ Semaphore API** 
+
 Semaphores take control of the access to shared resources by threads. A
 semaphore contains an internal count representing the number of available
 resources and a queue that uses a waiting list for threads to wait for available
