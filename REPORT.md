@@ -67,12 +67,12 @@ function on each item.
 
 ✔️getLength() function, we return the member 'length' of struct queue.
 
-**Testing😼**
-To check whether our coding parts is correctly constructed, we created our own tester which 
-containing one array as our data pool. By calling create() function to create a queue and 
-calling enqueue & dequeue, we compared the result with our designed output. If they do not 
-match with each other, an assertion will occurand give a test failure o us. Also, to check 
-iterator() function, we create our callback function containing delete() function, which 
+**Testing😼** To check whether our coding parts is correctly constructed, we
+created our own tester which containing one array as our data pool. By calling
+create() function to create a queue and calling enqueue & dequeue, we compared
+the result with our designed output. If they do not match with each other, an
+assertion will occurand give a test failure o us. Also, to check iterator()
+function, we create our callback function containing delete() function, which
 could check our delete() function and iterator function at once. 
 
 **Part 2️⃣ User-level thread library** 
