@@ -11,7 +11,9 @@ applications to create and run independent threads concurrently via high-quality
 C code.
 
 # Implementation 🌟
+
 **Part 1️⃣ Queue API**
+
 To implement thread, we chose one of the most used containers, queue, by a
 given API. To better manipulate our simple FIFO queue and make each operation
 effectively, we utilized **linked list** for our queue implementation. By taking
@@ -61,7 +63,9 @@ function on each item.
 
 ✔️getLength() function, we return the member 'length' of struct queue.
 
-**Testing😼** To check whether our coding parts is correctly constructed, we
+**Testing😼**
+
+To check whether our coding parts is correctly constructed, we
 created our own tester which containing one array as our data pool. By calling
 create() function to create a queue and calling enqueue & dequeue, we compared
 the result with our designed output. If they do not match with each other, an
@@ -70,6 +74,7 @@ function, we create our callback function containing delete() function, which
 could check our delete() function and iterator function at once. 
 
 **Part 2️⃣ User-level thread library** 
+
 Here, we want to implement most of thread management which are create, run,
 yield, exit, and block/unblock. By taking the advantage of queue that we
 constructed in part1, we create a queue called Ready_Queue that store the thread
@@ -78,48 +83,47 @@ thread that are finished. Also, we create a pointer of uthread_tcb called
 current thread for storing the current running thread and another pointer of
 uthread_tcb called idle_thread for storing the idle thread. 
 
-✔️uthread_create(), in this function, we create a thread by allocating a space
-for it and initialize its stack, context and state and enqueue it into
-Ready_Queue. 
+✔️uthread_create(), we create a thread by allocating a space for it and initialize 
+its stack, context and state and enqueue it into Ready_Queue. 
 
-✔️uthread_run(), in this function, we create the idle thread via
-**uthread_create()** and enqueue it into our Ready_Queue. We let current thread
-to be the idle thread and pass parameter of uthread_run() into uthread_create()
-for creating our first thread. Then, by using a infinite while loop, we keep
-calling **uthread_yield()** to get next thread and running the current thread
-until the **Ready_Queue** is empty.
+✔️uthread_run(), we create the idle thread via **uthread_create()** and enqueue 
+it into our Ready_Queue. We let current thread to be the idle thread and pass 
+parameter of uthread_run() into uthread_create() for creating our first thread. 
+Then, by using a infinite while loop, we keep calling **uthread_yield()** to get 
+next thread and running the current thread until the **Ready_Queue** is empty.
 
-✔️uthread_yield(), in this function, we make current thread 'READY' and enqueue
-it into our **Ready_Queue**. Then, we get next thread by calling queue_dequeue()
-and do a context switch between current thread and the next avaliable thread. We
-create two pointer of **uthread_tcb**, one called next_thread_ptr that storing
-the next available thread and the other one called current_thread_ptr that
-storing the current running thread. Now, by passing parameter to
-**uthread_ctx_switch**, we can do context switch between two threads.
+✔️uthread_yield(), we make current thread 'READY' and enqueue it into our **Ready_
+Queue**. Then, we get next thread by calling queue_dequeue()and do a context switch 
+between current thread and the next avaliable thread. We create two pointer of 
+**uthread_tcb**, one called next_thread_ptr that storing the next available thread 
+and the other one called current_thread_ptr that storing the current running thread. 
+Now, by passing parameter to **uthread_ctx_switch**, we can do context switch between 
+two threads.
 
-✔️uthread_exit(), in this function, we make current thread 'EXITED' and enqueue
-it into **Exited_Queue**. We create two pointer of **uthread_tcb**, one called
-next_thread_ptr that storing the next available thread and the other one called
-current_thread_ptr that storing the current running thread. By passing parameter
-to **uthread_ctx_switch**, we can do context switch between the two threads,
-making current thread exit and running the next available thread.
+✔️uthread_exit(), we make current thread 'EXITED' and enqueue it into **Exited_Queue**. 
+We create two pointer of **uthread_tcb**, one called next_thread_ptr that storing 
+the next available thread and the other one called current_thread_ptr that storing 
+the current running thread. By passing parameter to **uthread_ctx_switch**, we 
+can do context switch between the two threads,making current thread exit and running 
+the next available thread.
 
-✔️uthread_block(), in this function,  we make current thread 'BLOCKED'. we also
-create two pointer of **uthread_tcb**, one called next_thread_ptr that storing
-the next available thread and the other one called current_thread_ptr that
-storing the current running thread. By passing parameter to
-**uthread_ctx_switch**, we can do context switch between the two threads, making
-current thread exit and running the next available thread.
+✔️uthread_block(), we make current thread 'BLOCKED'. we also create two pointer of 
+**uthread_tcb**, one called next_thread_ptr that storing the next available thread 
+and the other one called current_thread_ptr that storing the current running thread. 
+By passing parameter to **uthread_ctx_switch**, we can do context switch between 
+the two threads, making current thread exit and running the next available thread.
 
 ✔️uthread_unblock(), in this function, we enqueue the thread that be passed into
 our **Ready_Queue**. 
 
 **Testing😼** 
+
 To check wheter our thread implementation can be successfully performed, we ran
 the uthread_hello.c and uthread_yile.c. Fortunately, it gave us exactly order of
 output that we expected to get. 
 
 **Part 3️⃣ Semaphore API** 
+
 Semaphores take control of the access to shared resources by threads. A
 semaphore contains an internal count representing the number of available
 resources and a queue that uses a waiting list for threads to wait for available
@@ -156,6 +160,7 @@ into **Ready_Queue** through the **uthread_unblock()** function. If
 **count** by one.
 
 **Testing😼** 
+
 In order to test the correctness of our implementation, we ran the four testing
 programs and were able to product the correct output. Our implementation will be
 able to prevent the first difficulty of the corner case. If a thread is trying
@@ -163,6 +168,7 @@ to take an unavailable resource, our program will block the thread and yeild to
 the next available thread.
 
 **Part 4 Preempt API** 
+
 In this part of the project, we implemented a preemption API, which is used to
 yield a thread periodically. To accomplish such a function, we install a signal
 handler and configure a timer that will fire an alarm a hundred times per
@@ -184,6 +190,7 @@ In preemp_stop(), we simply restore timer configuration and signal handler with
 the help of variables **old_timer** and **old_action**,
 
 **Testing😼** 
+
 For testing, we write a test program with 3 threads, each thread has an infinite
 loop. Inside the infinite loop, a statement will be printed after a short period
 (slightly less than the period we set).
