@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>//delete when submit
 #include "queue.h"
 
 struct queue 
